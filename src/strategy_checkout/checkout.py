@@ -1,19 +1,13 @@
 from .models import Order
+from .strategies import ShippingCostStrategy
+
 
 class Checkout:
-    def shipping_cost(self, order: Order, service: str) -> float:
-        if service == "standard":
-            if order.subtotal >= 1000:
-                return 0.0
-            return 49.0
+    def __init__(self, shipping_strategy: ShippingCostStrategy) -> None:
+        self.shipping_strategy = shipping_strategy
 
-        if service == "express":
-            return 99.0 + 12.0 * order.weight_kg
+    def shipping_cost(self, order: Order) -> float:
+        return self.shipping_strategy.calculate(order)
 
-        if service == "pickup":
-            return 0.0
-
-        raise ValueError(f"Unsupported service: {service}")
-
-    def total(self, order: Order, service: str) -> float:
-        return order.subtotal + self.shipping_cost(order, service)
+    def total(self, order: Order) -> float:
+        return order.subtotal + self.shipping_cost(order)
